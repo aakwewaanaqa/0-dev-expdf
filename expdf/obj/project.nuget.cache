@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Xhme+5GBPFI=",
+  "success": true,
+  "projectFilePath": "D:\\0-dev\\expdf\\expdf\\expdf.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\vvbda\\.nuget\\packages\\fsharp.core\\8.0.401\\fsharp.core.8.0.401.nupkg.sha512"
+  ],
+  "logs": []
+}
