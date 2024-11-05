@@ -1,27 +1,38 @@
-module expdf.Parsing
+module expdf.modules.Parsing
 
-open System.Text.RegularExpressions
+open System.Text.Json
+open System.Text.Json.Nodes
 open Microsoft.FSharp.Core
-
-type a =
-    | Byte of byte
-    | Char of char
-
-type source = list<a>
-
-type mode =
-    | Count of int
-    | Ending of a
-    | Endings of list<a>
-    | Line
-    | Pattern of Regex
+open Newtonsoft.Json
+open Unions
+open Sourcing
 
 [<Struct>]
-type Result(passed: bool, left: source, value: source) =
+type Result(_passed: bool, _left: source, _value: source) =
+    member this.passed = _passed
+    member this.left = _left
+    member this.value = _value
     new(left: source) = Result(false, left, [])
 
-let asSource (l: char list) : source =
-    [for c in l do yield Char c]
+let goOn (r: Result) =
+    if not r.passed then
+        failwith "previous result doesn't passed"
+    else
+        r.left
+
+let onPassed (fn: Result -> unit) (r: Result) : source =
+    if not r.passed then
+        failwith "previous result doesn't passed"
+    else
+        fn r
+        r.left
+
+let report (r: Result) =
+    printf "("
+    printf $"{r.passed}, "
+    printf $"'{r.left |> toString}', "
+    printf $"->'{r.value |> toString}'"
+    printf ")"
 
 let eat (m: mode) (s: source) : Result =
     match m with
@@ -30,7 +41,7 @@ let eat (m: mode) (s: source) : Result =
         if s.Length < c then
             Result(s)
         else
-            Result(true, s[c..], s[..c])
+            Result(true, s[c..], s[..c - 1])
 
     | Ending ending ->
         let rec collect (i: int) acc =
@@ -70,17 +81,16 @@ let eat (m: mode) (s: source) : Result =
             if i >= s.Length then
                 acc
             else
-                let adv = i + 1
-                let append = acc @ [ s[i] ]
-
                 let c =
                     s[i]
                     |> (function
                     | Char c -> c
                     | Byte b -> b |> char)
 
-                let isLF = c = '\n'
+                let adv = i + 1
+                let append = acc @ [ s[i] ]
                 let isCR = c = '\r'
+                let isLF = c = '\n'
 
                 match isCRmet, isLF, isCR with
                 | false, true, false -> append

@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "Xhme+5GBPFI=",
+  "dgSpecHash": "GDnWwH9e3iQ=",
   "success": true,
   "projectFilePath": "D:\\0-dev\\expdf\\expdf\\expdf.fsproj",
   "expectedPackageFiles": [
-    "C:\\Users\\vvbda\\.nuget\\packages\\fsharp.core\\8.0.401\\fsharp.core.8.0.401.nupkg.sha512"
+    "C:\\Users\\vvbda\\.nuget\\packages\\fsharp.core\\8.0.401\\fsharp.core.8.0.401.nupkg.sha512",
+    "C:\\Users\\vvbda\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
   "logs": []
 }

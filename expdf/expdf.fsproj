@@ -6,11 +6,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="modules\Unions.fs" />
+        <Compile Include="modules\Sourcing.fs" />
+        <Compile Include="modules\Parsing.fs" />
         <Compile Include="StreamsModule.fs" />
         <Compile Include="BytesModule.fs" />
-        <Compile Include="Classes\Mode.fs" />
         <Compile Include="Tests\EatTests.fs" />
         <Compile Include="Program.fs"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
 </Project>

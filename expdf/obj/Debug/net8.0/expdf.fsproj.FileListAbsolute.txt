@@ -27,3 +27,5 @@ D:\0-dev\expdf\expdf\obj\Debug\net8.0\refint\expdf.dll
 D:\0-dev\expdf\expdf\obj\Debug\net8.0\expdf.pdb
 D:\0-dev\expdf\expdf\obj\Debug\net8.0\expdf.genruntimeconfig.cache
 D:\0-dev\expdf\expdf\obj\Debug\net8.0\ref\expdf.dll
+D:\0-dev\expdf\expdf\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\0-dev\expdf\expdf\obj\Debug\net8.0\expdf.sourcelink.json
