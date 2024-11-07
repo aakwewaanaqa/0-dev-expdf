@@ -2,62 +2,62 @@ module expdf.modules.Parsing
 
 open System.Text.Json
 open System.Text.Json.Nodes
+open System.Text.RegularExpressions
 open Microsoft.FSharp.Core
 open Newtonsoft.Json
 open Unions
 open Sourcing
 
+
 [<Struct>]
-type Result(_passed: bool, _left: source, _value: source) =
-    member this.passed = _passed
+type Remain(_left: source, _value: source) =
     member this.left = _left
     member this.value = _value
-    new(left: source) = Result(false, left, [])
 
-let goOn (r: Result) =
-    if not r.passed then
-        failwith "previous result doesn't passed"
-    else
-        r.left
+module Remains =
+    let logValue (r: Remain) =
+        printf ""
+        printf $"v <-'{r.value |> Sources.toString}'\n"
+        printf $"l <-'{r.left |> Sources.toString}'\n"
 
-let onPassed (fn: Result -> unit) (r: Result) : source =
-    if not r.passed then
-        failwith "previous result doesn't passed"
-    else
-        fn r
-        r.left
+type result =
+     | Passed of Remain
+     | Fail of source
 
-let report (r: Result) =
-    printf "("
-    printf $"{r.passed}, "
-    printf $"'{r.left |> toString}', "
-    printf $"->'{r.value |> toString}'"
-    printf ")"
+module Results =
+    let ifPassed (r: result) =
+        match r with
+        | Passed r -> r.left
+        | Fail _ -> failwith "failed..."
 
-let eat (m: mode) (s: source) : Result =
+    let onPassed (fn: Remain -> unit) (r: result) : source =
+        match r with
+        | Passed r ->
+            fn r
+            r.left
+        | Fail _ -> failwith "failed..."
+
+
+let eat (m: mode) (s: source) : result =
     match m with
 
     | Count c ->
         if s.Length < c then
-            Result(s)
+            Fail s
         else
-            Result(true, s[c..], s[..c - 1])
+            Passed (Remain(s[c..], s[..c - 1]))
 
     | Ending ending ->
-        let rec collect (i: int) acc =
-            if i >= s.Length then
-                acc
-            else
-                let adv = i + 1
-                let append = (acc @ [ s[i] ])
-                let isEnding = s[i] = ending
+        let str = s |> Sources.toString
+        let i = str.IndexOf(ending)
+        let offset = ending.Length
+        let value = str.Substring(0, i + offset) |> Sources.inString;
+        let remain = str.Substring(i + offset, str.Length - i - offset) |> Sources.inString;
+        if i > -1 then
+            Passed (Remain(remain, value))
+        else
+            Fail s
 
-                match isEnding with
-                | true -> append
-                | false -> append |> collect adv
-
-        let v = collect 0 []
-        Result(true, s[v.Length ..], v)
 
     | Endings endings ->
         let rec collect (i: int) (flag: bool) (acc: source) =
@@ -74,7 +74,7 @@ let eat (m: mode) (s: source) : Result =
                 | _ -> append |> collect adv flag
 
         let v = collect 0 false []
-        Result(true, s[v.Length ..], v)
+        Passed (Remain(s[v.Length ..], v))
 
     | Line ->
         let rec collect (i: int) (isCRmet: bool) (acc: source) =
@@ -102,36 +102,12 @@ let eat (m: mode) (s: source) : Result =
                 | _ -> failwith "eat Line falls to here..."
 
         let v = collect 0 false []
-        Result(true, s[v.Length ..], v)
+        Passed (Remain(s[v.Length ..], v))
 
     | Pattern regex ->
-        let rec collect (i: int) (acc: source) =
-            let adv = i + 1
-            let append = acc @ [ s[i] ]
-            let cantAppend = i >= s.Length
-
-            let isMatch =
-                if cantAppend then
-                    false
-                else
-                    append
-                    |> List.map (function
-                        | Char c -> c
-                        | Byte b -> b |> char)
-                    |> List.toArray
-                    |> string
-                    |> regex.IsMatch
-
-            if i >= s.Length then
-                acc
-            else
-                match isMatch with
-                | true -> append |> collect adv
-                | false -> acc
-
-        let v = collect 0 []
-
-        if v.Length = 0 then
-            Result(s)
-        else
-            Result(true, s[v.Length ..], v)
+        let str = s |> Sources.toString
+        let m = regex.Match str
+        let v = m.Value |> Sources.inString
+        match m.Success, m.Index with
+        | true, 0 -> Passed (Remain(s[v.Length ..], v))
+        | _ -> Fail s

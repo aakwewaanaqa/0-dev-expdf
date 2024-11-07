@@ -9,21 +9,44 @@ let say x =
 
 let ``testEatCount`` () =
     "apple"
-    |> inString
+    |> Sources.inString
     |> eat (Count 2)
-    |> onPassed (fun r -> r |> report)
+    |> Results.onPassed (fun r -> r |> Remains.logValue)
     |> ignore
-
     ()
 
 let ``testEatLine`` () =
-    "From teacher:\r\n Hello this is your teacher.\r\n How are you doing?"
-    |> inString
-    |> eat Line |> goOn
-    |> eat Line |> goOn
-    |> eat Line
-    |> onPassed (fun r -> r |> report)
+    "
+Ponito:\rHey!\nThis is from Taiwan.\r\nHow are you doing?\r\r
+I was wondering, if we can meet up.\n
+Have some fun!\r
+That would be nice.
+    "
+    |> Sources.inString
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
+    |> eat Line |> Results.onPassed Remains.logValue
     |> ignore
-
     ()
 
+let ``testEnding`` () =
+    "
+if [ -z $1 ]; then
+    echo -e '第1個參數不能是空的'
+fi
+if [ -z $2 ]; then
+    echo -e '第2個參數不能是空的'
+fi"
+    |> Sources.inString
+    |> eat (Ending "fi") |> Results.onPassed Remains.logValue
+    |> ignore
+    ()

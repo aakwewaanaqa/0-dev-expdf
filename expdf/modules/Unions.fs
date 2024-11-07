@@ -8,7 +8,7 @@ type a =
 
 type mode =
     | Count of int
-    | Ending of a
+    | Ending of string
     | Endings of list<a>
     | Line
     | Pattern of Regex
